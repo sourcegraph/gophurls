@@ -16,11 +16,19 @@ var verbose = flag.Bool("v", false, "show verbose output")
 
 type link struct {
 	URL string
+
+	// Title is the page's title.
+	Title string
 }
 
 var (
-	links      []*link
+	// links stores the fetched URLs and their titles.
+	links []*link
+
 	linksMutex sync.RWMutex
+
+	// urls contains newly added URLs enqueued to fetch.
+	urlsToFetch = make(chan string)
 )
 
 func init() {
@@ -28,6 +36,8 @@ func init() {
 	// doesn't run when testing.)
 	http.HandleFunc("/links", addLink)
 	http.HandleFunc("/", home)
+
+	go startFetcher()
 }
 
 func main() {
@@ -39,12 +49,13 @@ func main() {
 
 var homeTmpl = template.Must(template.New("Home").Parse(`
 <h1>GophURLs <img width=28 height=38 src="http://golang.org/doc/gopher/frontpage.png"></h1>
-<p>Submit a link: <tt>curl -X POST -d '{"URL":"http://example.com"}' http://localhost:7000/links</tt></p>
+<p>Submit a link: <tt>curl -X POST -d '{"URL":"http://example.com","Title":"optional title"}' http://localhost:7000/links</tt></p>
+<p>Newly added links without titles appear only after they've been fetched.</p>
 <h2>Links ({{len .}})</h2>
 <ol>
 {{/* Iterate over the data we passed to the template (links). */}}
 {{range .}}
-  <li><a href="{{.URL}}">{{.URL}}</a></li>
+  <li><a href="{{.URL}}">{{.Title}}</a></li>
 {{end}}
 </ol>
 `))
@@ -86,8 +97,13 @@ func addLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Lock links for writing and add the new link.
-	linksMutex.Lock()
-	defer linksMutex.Unlock()
-	links = append(links, link)
+	if link.Title == "" {
+		// If no title is specified, enqueue it to fetch the title.
+		urlsToFetch <- link.URL
+	} else {
+		// Otherwise, lock links for writing and add the new link.
+		linksMutex.Lock()
+		defer linksMutex.Unlock()
+		links = append(links, link)
+	}
 }
