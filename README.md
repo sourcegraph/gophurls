@@ -7,4 +7,4 @@ go get code.google.com/p/go.talks/present
 present
 ````
 
-Then open your browser to http://localhost:3999.
+Then open your browser to http://localhost:3999/talk/talk.slide.
