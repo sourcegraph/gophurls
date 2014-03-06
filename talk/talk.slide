@@ -15,7 +15,7 @@ https://sourcegraph.com/sqs
 - Networking
 - Intros (Francesc from the Go team, Iron.io, Rackspace, Sourcegraph)
 
-*Build GophURLs*
+*Build*GophURLs*
 
 - Build a tiny link sharing app.
 - Improve it to fetch link titles.
