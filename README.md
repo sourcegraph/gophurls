@@ -5,8 +5,8 @@ To get started, open the GophURLs slides [here](http://go-talks.appspot.com/gith
 Or if you want to run them locally run the following commands:
 
 ```
-go get code.google.com/p/go.talks/present
-cd /Users/campoy/go/path/src/github.com/sourcegraph/gophurls/talk/
+go get golang.org/x/tools/cmd/present
+cd $GOPATH/src/github.com/sourcegraph/gophurls/talk/
 present
 ````
 
